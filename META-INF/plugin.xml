@@ -1,0 +1,49 @@
+<idea-plugin version="2">
+	<id>de.u-mass.idea.copyConstructor</id>
+	<name>GenerateCopyConstructor</name>
+	<version>1.0</version>
+	<vendor email="j.kovacs@u-mass.de" url="http://www.u-mass.de">Johann Kovacs</vendor>
+
+	<description><![CDATA[
+			Adds an option to generate a copy constructor to the generate menu (alt + ins). The action will generate
+			a copy constructor taking an instance of the same class and copying over every field. If there is a
+			copy constructor available in the superclass it will be called as well.<br/>
+			Also adds 2 inspections that generate warnings if a copy constructor might be faulty (i.e. superclass
+			copy constructor not called or not all fields copied).
+      ]]></description>
+
+	<change-notes><![CDATA[]]></change-notes>
+
+	<!-- please see http://confluence.jetbrains.net/display/IDEADEV/Build+Number+Ranges for description -->
+	<idea-version since-build="123.72"/>
+
+	<depends>com.intellij.modules.java</depends>
+
+	<application-components>
+		<!-- Add your application components here -->
+	</application-components>
+
+	<project-components>
+		<!-- Add your project components here -->
+	</project-components>
+
+	<actions>
+		<!-- Add your actions here -->
+		<action id="GenerateCopyConstructor" class="de.umass.idea.copyConstructor.GenerateCopyConstructorAction" text="Copy Constructor"
+				description="Generates a copy constructor">
+			<add-to-group group-id="JavaGenerateGroup1" anchor="after" relative-to-action="GenerateConstructor"/>
+		</action>
+	</actions>
+
+	<extensions defaultExtensionNs="com.intellij">
+		<!-- Add your extensions here -->
+		<localInspection implementationClass="de.umass.idea.copyConstructor.inspection.SuperclassConstructorInspection"
+						 displayName="Copy constructor doesn't call superclass copy constructor"
+						 groupName="Probable bugs"
+						 enabledByDefault="true"/>
+		<localInspection implementationClass="de.umass.idea.copyConstructor.inspection.IncompleteCopyConstructorInspection"
+						 displayName="Copy constructor doesn't copy all fields"
+						 groupName="Probable bugs"
+						 enabledByDefault="true"/>
+	</extensions>
+</idea-plugin>
