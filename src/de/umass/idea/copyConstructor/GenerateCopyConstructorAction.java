@@ -37,10 +37,17 @@ public class GenerateCopyConstructorAction extends AnAction {
 
 		StringBuilder code = new StringBuilder();
 		code.append(String.format("public %s(%s %s) {", psiClass.getName(), psiClass.getName(), parameterName));
+
 		if (superclassCopyConstructor != null) {
 			code.append(String.format("super(%s);", parameterName));
 		}
+
 		for (PsiField field : fields) {
+			// Skip static fields as they're non-instance
+			if (field.hasModifierProperty(PsiModifier.STATIC)) {
+				continue;
+			}
+
 			String name = field.getName();
 			code.append(String.format("this.%s = %s.%s;", name, parameterName, name));
 		}

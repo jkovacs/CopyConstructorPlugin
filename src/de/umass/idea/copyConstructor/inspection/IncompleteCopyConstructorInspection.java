@@ -1,17 +1,34 @@
 package de.umass.idea.copyConstructor.inspection;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import com.intellij.codeInspection.LocalInspectionTool;
 import com.intellij.codeInspection.LocalInspectionToolSession;
 import com.intellij.codeInspection.ProblemHighlightType;
 import com.intellij.codeInspection.ProblemsHolder;
-import com.intellij.psi.*;
+import com.intellij.psi.JavaElementVisitor;
+import com.intellij.psi.JavaRecursiveElementVisitor;
+import com.intellij.psi.PsiAssignmentExpression;
+import com.intellij.psi.PsiClass;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiElementVisitor;
+import com.intellij.psi.PsiExpression;
+import com.intellij.psi.PsiField;
+import com.intellij.psi.PsiIdentifier;
+import com.intellij.psi.PsiMethod;
+import com.intellij.psi.PsiModifier;
+import com.intellij.psi.PsiParameter;
+import com.intellij.psi.PsiReference;
+import com.intellij.psi.PsiReferenceExpression;
+import com.intellij.psi.PsiThisExpression;
+import com.intellij.psi.PsiVariable;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
 import static de.umass.idea.copyConstructor.ConstructorUtil.isCopyConstructor;
 
@@ -35,7 +52,19 @@ public class IncompleteCopyConstructorInspection extends LocalInspectionTool {
 		public void visitMethod(PsiMethod method) {
 			PsiClass containingClass = method.getContainingClass();
 			if (isCopyConstructor(method) && containingClass != null) {
-				if (!constructorAssignsAllFields(method, containingClass.getFields())) {
+				final List<PsiField> fields = Arrays.asList(containingClass.getFields());
+				final Iterator<PsiField> iterator = fields.iterator();
+
+				// remove static fields before inspecting
+				while (iterator.hasNext()) {
+					PsiField field = iterator.next();
+
+					if (field.hasModifierProperty(PsiModifier.STATIC)) {
+						iterator.remove();
+					}
+				}
+
+				if (!constructorAssignsAllFields(method, (PsiField[]) fields.toArray())) {
 					PsiIdentifier identifier = method.getNameIdentifier();
 					holder.registerProblem(identifier != null ? identifier : method, "Copy constructor does not copy all fields",
 							ProblemHighlightType.WEAK_WARNING);
@@ -78,12 +107,12 @@ public class IncompleteCopyConstructorInspection extends LocalInspectionTool {
 			if (expression != null && expression instanceof PsiReferenceExpression) {
 				PsiReferenceExpression referenceExpression = (PsiReferenceExpression) expression;
 				PsiExpression qualifierExpression = referenceExpression.getQualifierExpression();
-				return referenceExpression.isReferenceTo(field) && qualifierReferecesVariable(qualifierExpression, instance);
+				return referenceExpression.isReferenceTo(field) && qualifierReferencesVariable(qualifierExpression, instance);
 			}
 			return false;
 		}
 
-		private boolean qualifierReferecesVariable(@Nullable PsiExpression qualifier, @Nullable PsiVariable instance) {
+		private boolean qualifierReferencesVariable(@Nullable PsiExpression qualifier, @Nullable PsiVariable instance) {
 			if (instance == null && qualifierReferencesThis(qualifier))
 				return true;
 
