@@ -4,6 +4,9 @@ import com.intellij.psi.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class ConstructorUtil {
 
 	private ConstructorUtil() {
@@ -59,4 +62,20 @@ public class ConstructorUtil {
 		}
 		return null;
 	}
+
+	/**
+	 * Finds all fields in the passed class that should be copied by a copy constructor.
+	 * This excludes, for example, static fields.
+	 */
+	public static List<PsiField> getAllCopyableFields(PsiClass psiClass) {
+		List<PsiField> copyableFields = new ArrayList<PsiField>();
+		PsiField[] fields = psiClass.getFields();
+		for (PsiField field : fields) {
+			if (!field.hasModifierProperty(PsiModifier.STATIC)) {
+				copyableFields.add(field);
+			}
+		}
+		return copyableFields;
+	}
+
 }

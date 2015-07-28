@@ -14,19 +14,17 @@ import com.intellij.psi.PsiExpression;
 import com.intellij.psi.PsiField;
 import com.intellij.psi.PsiIdentifier;
 import com.intellij.psi.PsiMethod;
-import com.intellij.psi.PsiModifier;
 import com.intellij.psi.PsiParameter;
 import com.intellij.psi.PsiReference;
 import com.intellij.psi.PsiReferenceExpression;
 import com.intellij.psi.PsiThisExpression;
 import com.intellij.psi.PsiVariable;
 
+import de.umass.idea.copyConstructor.ConstructorUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -52,19 +50,9 @@ public class IncompleteCopyConstructorInspection extends LocalInspectionTool {
 		public void visitMethod(PsiMethod method) {
 			PsiClass containingClass = method.getContainingClass();
 			if (isCopyConstructor(method) && containingClass != null) {
-				final List<PsiField> fields = Arrays.asList(containingClass.getFields());
-				final Iterator<PsiField> iterator = fields.iterator();
+				final List<PsiField> fields = ConstructorUtil.getAllCopyableFields(containingClass);
 
-				// remove static fields before inspecting
-				while (iterator.hasNext()) {
-					PsiField field = iterator.next();
-
-					if (field.hasModifierProperty(PsiModifier.STATIC)) {
-						iterator.remove();
-					}
-				}
-
-				if (!constructorAssignsAllFields(method, (PsiField[]) fields.toArray())) {
+				if (!constructorAssignsAllFields(method, fields)) {
 					PsiIdentifier identifier = method.getNameIdentifier();
 					holder.registerProblem(identifier != null ? identifier : method, "Copy constructor does not copy all fields",
 							ProblemHighlightType.WEAK_WARNING);
@@ -72,8 +60,7 @@ public class IncompleteCopyConstructorInspection extends LocalInspectionTool {
 			}
 		}
 
-		private boolean constructorAssignsAllFields(final PsiMethod constructor, PsiField[] fields) {
-			final List<PsiField> allFields = Arrays.asList(fields);
+		private boolean constructorAssignsAllFields(final PsiMethod constructor, List<PsiField> allFields) {
 			final Set<PsiField> unassignedFields = new HashSet<PsiField>(allFields);
 			final PsiParameter copyParameter = constructor.getParameterList().getParameters()[0];
 			constructor.accept(new JavaRecursiveElementVisitor() {

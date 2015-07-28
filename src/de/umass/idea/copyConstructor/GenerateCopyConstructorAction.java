@@ -10,6 +10,8 @@ import com.intellij.psi.*;
 import com.intellij.psi.codeStyle.JavaCodeStyleManager;
 import com.intellij.psi.util.PsiTreeUtil;
 
+import java.util.List;
+
 public class GenerateCopyConstructorAction extends AnAction {
 
 	public void actionPerformed(AnActionEvent e) {
@@ -30,7 +32,7 @@ public class GenerateCopyConstructorAction extends AnAction {
 	}
 
 	private void generateCopyConstructor(PsiClass psiClass) {
-		PsiField[] fields = psiClass.getFields();
+		List<PsiField> fields = ConstructorUtil.getAllCopyableFields(psiClass);
 		String parameterName = "other";
 
 		PsiMethod superclassCopyConstructor = ConstructorUtil.findCopyConstructor(psiClass.getSuperClass());
@@ -43,11 +45,6 @@ public class GenerateCopyConstructorAction extends AnAction {
 		}
 
 		for (PsiField field : fields) {
-			// Skip static fields as they're non-instance
-			if (field.hasModifierProperty(PsiModifier.STATIC)) {
-				continue;
-			}
-
 			String name = field.getName();
 			code.append(String.format("this.%s = %s.%s;", name, parameterName, name));
 		}
