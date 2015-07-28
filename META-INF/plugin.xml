@@ -1,7 +1,7 @@
 <idea-plugin version="2">
 	<id>de.u-mass.idea.copyConstructor</id>
 	<name>GenerateCopyConstructor</name>
-	<version>1.0</version>
+	<version>1.1</version>
 	<vendor email="j.kovacs@u-mass.de" url="http://www.u-mass.de">Johann Kovacs</vendor>
 
 	<description><![CDATA[
