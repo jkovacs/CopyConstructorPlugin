@@ -40,6 +40,10 @@ public class ConstructorUtil {
 		return null;
 	}
 
+	public static boolean hasCopyConstructor(@Nullable PsiClass psiClass) {
+		return findCopyConstructor(psiClass) != null;
+	}
+
 	/**
 	 * Finds the explicitly called constructor method, i.e. the one references by any call to super() or this(),
 	 * in the passed constructor method, or null if no explicit constructor call is present.
@@ -71,11 +75,21 @@ public class ConstructorUtil {
 		List<PsiField> copyableFields = new ArrayList<PsiField>();
 		PsiField[] fields = psiClass.getFields();
 		for (PsiField field : fields) {
-			if (!field.hasModifierProperty(PsiModifier.STATIC)) {
+			if (isCopyableField(field)) {
 				copyableFields.add(field);
 			}
 		}
 		return copyableFields;
+	}
+
+	/**
+	 * Returns true if a specific field is copyable by a copy constructor. Fields that can't or should not be copied include:
+	 * * static fields,
+	 * * final and already initialized fields.
+	 */
+	private static boolean isCopyableField(PsiField field) {
+		return !field.hasModifierProperty(PsiModifier.STATIC)
+				&& (!field.hasModifierProperty(PsiModifier.FINAL) || field.getInitializer() == null);
 	}
 
 }
