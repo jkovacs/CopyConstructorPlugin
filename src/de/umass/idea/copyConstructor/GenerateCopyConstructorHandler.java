@@ -45,12 +45,12 @@ public class GenerateCopyConstructorHandler extends GenerateMembersHandlerBase {
 	@Override
 	protected List<? extends GenerationInfo> generateMemberPrototypes(PsiClass aClass, ClassMember[] members) throws IncorrectOperationException {
 		PsiMethod copyConstructor = generateCopyConstructor(aClass, members);
-		return Collections.singletonList(new PsiGenerationInfo<PsiMethod>(copyConstructor));
+		return Collections.singletonList(new PsiGenerationInfo<>(copyConstructor));
 	}
 
 	@Override
 	protected GenerationInfo[] generateMemberPrototypes(PsiClass aClass, ClassMember originalMember) throws IncorrectOperationException {
-		return null;
+		return new GenerationInfo[0];
 	}
 
 	private PsiMethod generateCopyConstructor(PsiClass psiClass, ClassMember[] copyableFields) {
@@ -72,8 +72,7 @@ public class GenerateCopyConstructorHandler extends GenerateMembersHandlerBase {
 		code.append("}");
 
 		PsiElementFactory elementFactory = JavaPsiFacade.getElementFactory(psiClass.getProject());
-		PsiMethod constructor = elementFactory.createMethodFromText(code.toString(), psiClass);
-		return constructor;
+		return elementFactory.createMethodFromText(code.toString(), psiClass);
 	}
 
 	private ClassMember[] toMembers(List<PsiField> allCopyableFields) {

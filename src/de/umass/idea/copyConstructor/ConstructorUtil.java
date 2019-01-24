@@ -40,7 +40,7 @@ public class ConstructorUtil {
 		return null;
 	}
 
-	public static boolean hasCopyConstructor(@Nullable PsiClass psiClass) {
+	static boolean hasCopyConstructor(@Nullable PsiClass psiClass) {
 		return findCopyConstructor(psiClass) != null;
 	}
 
@@ -72,7 +72,7 @@ public class ConstructorUtil {
 	 * This excludes, for example, static fields.
 	 */
 	public static List<PsiField> getAllCopyableFields(PsiClass psiClass) {
-		List<PsiField> copyableFields = new ArrayList<PsiField>();
+		List<PsiField> copyableFields = new ArrayList<>();
 		PsiField[] fields = psiClass.getFields();
 		for (PsiField field : fields) {
 			if (isCopyableField(field)) {
